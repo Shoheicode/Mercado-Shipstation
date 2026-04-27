@@ -7,3 +7,4 @@ tables.csv
 extracted_orders.csv
 input_output.txt
 __pycache__/main.cpython-311.pyc
+.env

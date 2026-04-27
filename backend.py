@@ -1,7 +1,16 @@
+import os
+
 import pandas as pd
 import pdfplumber
 import re
 from pathlib import Path
+
+from MercadoLibre import MercadoLibreClient
+
+CLIENT_ID = os.environ.get("ML_CLIENT_ID", "").strip()
+CLIENT_SECRET = os.environ.get("ML_CLIENT_SECRET", "").strip()
+REDIRECT_URI = os.environ.get("ML_REDIRECT_URI", "").strip()
+AUTH_CODE = os.environ.get("ML_AUTH_CODE", "").strip()
 
 PDF_FOLDER = Path("uploads_pdf")  # change this to your folder path
 OUTPUT_CSV = "extracted_orders.csv"
@@ -36,6 +45,13 @@ def read_txt_and_extract_order_number(text_file_name="output1.txt"):
         print("Order number not found")
 
 def running_backend():
+
+    ml_api = MercadoLibreClient(
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        redirect_uri=REDIRECT_URI,
+        auth_code=AUTH_CODE,
+    )
 
     results = []
 
