@@ -1,8 +1,12 @@
+import pandas as pd
 import pdfplumber
 import re
 from pathlib import Path
 
-def get_order_number_from_pdf(pdf_path):
+PDF_FOLDER = Path("uploads_pdf")  # change this to your folder path
+OUTPUT_CSV = "extracted_orders.csv"
+
+def get_order_number_from_pdf(pdf_path, text_file_name="output1.txt"):
     with pdfplumber.open(pdf_path) as pdf:
         all_text = []
 
@@ -13,12 +17,12 @@ def get_order_number_from_pdf(pdf_path):
 
     text = "\n".join(all_text)
 
-    with open("output1.txt", "w", encoding="utf-8") as f:
-        print("Writing text to output1.txt...")
+    with open(text_file_name, "w", encoding="utf-8") as f:
+        print(f"Writing text to {text_file_name}...")
         f.write(text)
 
-def read_txt_and_extract_order_number():
-    txt_path = Path("output1.txt")
+def read_txt_and_extract_order_number(text_file_name="output1.txt"):
+    txt_path = Path(text_file_name)
 
     text = txt_path.read_text(encoding="utf-8", errors="ignore")
 
@@ -32,9 +36,34 @@ def read_txt_and_extract_order_number():
         print("Order number not found")
 
 def main():
-    pdf_path = Path("Binder1.pdf")
-    get_order_number_from_pdf(pdf_path)
-    read_txt_and_extract_order_number()
+
+    results = []
+
+    for pdf_path in PDF_FOLDER.glob("*.pdf"):
+        try:
+            print(f"Processing {pdf_path}...")
+            text_file_name = f"{pdf_path.stem}_output.txt"
+            get_order_number_from_pdf(pdf_path, text_file_name)
+            order = read_txt_and_extract_order_number(text_file_name)
+            print(f"Processed {pdf_path.name}: Order Number - {order if order else 'NOT FOUND'}")
+
+            if order:
+                results.append({
+                    "file_name": pdf_path.name,
+                    "order_number": order
+                })
+            else:
+                results.append({
+                    "file_name": pdf_path.name,
+                    "order_number": "NOT FOUND"
+                })
+        except Exception as e:
+            print(f"Error processing {pdf_path}: {e}")
+            continue
+
+    df = pd.DataFrame(results)
+    df.to_csv(OUTPUT_CSV, index=False)
+    print(f"Results saved to {OUTPUT_CSV}")
 
 if __name__ == "__main__":
     main()
