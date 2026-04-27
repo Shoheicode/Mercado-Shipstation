@@ -35,7 +35,7 @@ def read_txt_and_extract_order_number(text_file_name="output1.txt"):
     else:
         print("Order number not found")
 
-def main():
+def running_backend():
 
     results = []
 
@@ -66,4 +66,4 @@ def main():
     print(f"Results saved to {OUTPUT_CSV}")
 
 if __name__ == "__main__":
-    main()
+    running_backend()
