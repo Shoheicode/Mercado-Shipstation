@@ -1,17 +1,29 @@
 import pdfplumber
-import pandas as pd
-
-tables = []
+import re
+from pathlib import Path
 
 with pdfplumber.open("input.pdf") as pdf:
-    for page_number, page in enumerate(pdf.pages, start=1):
-        page_tables = page.extract_tables()
+    all_text = []
 
-        for table in page_tables:
-            df = pd.DataFrame(table)
-            df["source_page"] = page_number
-            tables.append(df)
+    for page in pdf.pages:
+        text = page.extract_text()
+        if text:
+            all_text.append(text)
 
-if tables:
-    final_df = pd.concat(tables, ignore_index=True)
-    final_df.to_csv("tables.csv", index=False)
+text = "\n".join(all_text)
+
+with open("output1.txt", "w", encoding="utf-8") as f:
+    print("Writing text to output1.txt...")
+    f.write(text)
+
+txt_path = Path("output1.txt")
+
+text = txt_path.read_text(encoding="utf-8", errors="ignore")
+
+match = re.search(r"(?:Pack\s*ID\s*:|US\s*Order\s*#)\s*(\d+)", text, re.IGNORECASE)
+
+if match:
+    order_number = match.group(1)
+    print("Order number:", order_number)
+else:
+    print("Order number not found")
