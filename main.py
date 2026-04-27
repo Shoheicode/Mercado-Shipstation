@@ -1,15 +1,17 @@
-from pypdf import PdfReader
+import pdfplumber
+import pandas as pd
 
-reader = PdfReader("Binder1.pdf")
+tables = []
 
-all_text = []
+with pdfplumber.open("input.pdf") as pdf:
+    for page_number, page in enumerate(pdf.pages, start=1):
+        page_tables = page.extract_tables()
 
-for page in reader.pages:
-    text = page.extract_text()
-    if text:
-        all_text.append(text)
+        for table in page_tables:
+            df = pd.DataFrame(table)
+            df["source_page"] = page_number
+            tables.append(df)
 
-result = "\n".join(all_text)
-
-with open("output.txt", "w", encoding="utf-8") as f:
-    f.write(result)
+if tables:
+    final_df = pd.concat(tables, ignore_index=True)
+    final_df.to_csv("tables.csv", index=False)
