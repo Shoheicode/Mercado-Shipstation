@@ -4,6 +4,8 @@ import pandas as pd
 import pdfplumber
 import re
 from pathlib import Path
+from dotenv import load_dotenv
+load_dotenv()
 
 from MercadoLibre import MercadoLibreClient
 
